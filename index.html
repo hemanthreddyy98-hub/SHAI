@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SHAI - Super Human AI</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+
+        .sidebar {
+            width: 300px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border-radius: 15px;
+        }
+
+        .logo h1 {
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+            margin-bottom: 5px;
+        }
+
+        .logo p {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .new-chat-btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        .chat-header {
+            padding: 20px;
+            background: white;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .chat-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .chat-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .action-btn.primary {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .action-btn.secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #fafafa;
+        }
+
+        .message {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+        }
+
+        .message.user {
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+        }
+
+        .message.user .message-avatar {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+        }
+
+        .message.assistant .message-avatar {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+        }
+
+        .message-content {
+            max-width: 70%;
+            padding: 15px 20px;
+            border-radius: 20px;
+            word-wrap: break-word;
+        }
+
+        .message.user .message-content {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border-bottom-right-radius: 5px;
+        }
+
+        .message.assistant .message-content {
+            background: white;
+            color: #333;
+            border: 1px solid #e0e0e0;
+            border-bottom-left-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .chat-input-container {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .chat-input-wrapper {
+            display: flex;
+            gap: 15px;
+            align-items: flex-end;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            font-size: 16px;
+            resize: none;
+            min-height: 50px;
+            max-height: 150px;
+            font-family: inherit;
+        }
+
+        .chat-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .send-btn {
+            width: 50px;
+            height: 50px;
+            border: none;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .welcome-message {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .welcome-message h2 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .feature-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .feature-item {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .feature-icon {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .typing-indicator {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 15px 20px;
+            background: white;
+            border-radius: 20px;
+            border: 1px solid #e0e0e0;
+            max-width: 70%;
+            margin-bottom: 20px;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 3px;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #667eea;
+            animation: typing 1.4s infinite ease-in-out;
+        }
+
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes typing {
+            0%, 80%, 100% {
+                transform: scale(0.8);
+                opacity: 0.5;
+            }
+            40% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .model-info {
+            font-size: 12px;
+            opacity: 0.7;
+            margin-top: 5px;
+        }
+
+        .error-message {
+            background: #ffebee;
+            color: #c62828;
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border: 1px solid #ffcdd2;
+        }
+
+        .api-status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            z-index: 1000;
+        }
+
+        .api-status.connected {
+            background: #4caf50;
+            color: white;
+        }
+
+        .api-status.disconnected {
+            background: #f44336;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="api-status" id="apiStatus">Checking API...</div>
+    
+    <div class="container">
+        <div class="sidebar">
+            <div class="logo">
+                <h1>SHAI</h1>
+                <p>Super Human AI</p>
+            </div>
+            
+            <button class="new-chat-btn" onclick="startNewChat()">
+                ✨ New Chat
+            </button>
+        </div>
+        
+        <div class="main-content">
+            <div class="chat-header">
+                <div class="chat-title" id="chatTitle">Welcome to SHAI</div>
+                <div class="chat-actions">
+                    <button class="action-btn secondary" onclick="clearChat()">Clear</button>
+                    <button class="action-btn primary" onclick="saveChat()">Save</button>
+                </div>
+            </div>
+            
+            <div class="chat-messages" id="chatMessages">
+                <div class="welcome-message">
+                    <h2>Welcome to SHAI - Super Human AI</h2>
+                    <p>Your advanced AI assistant with intelligent responses</p>
+                    
+                    <div class="feature-list">
+                        <div class="feature-item">
+                            <div class="feature-icon">🧠</div>
+                            <div>Smart AI</div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon">🔍</div>
+                            <div>Context Aware</div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon">💡</div>
+                            <div>Intelligent</div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon">⚡</div>
+                            <div>Fast Response</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="chat-input-container">
+                <div class="chat-input-wrapper">
+                    <textarea 
+                        class="chat-input" 
+                        id="chatInput" 
+                        placeholder="Ask SHAI anything..."
+                        rows="1"
+                        onkeydown="handleKeyDown(event)"
+                        oninput="autoResize(this)"
+                    ></textarea>
+                    <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+                        ➤
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentConversationId = null;
+        let conversations = [];
+        let isTyping = false;
+        let apiBaseUrl = 'http://localhost:8080';
+
+        document.addEventListener('DOMContentLoaded', function() {
+            setupEventListeners();
+            checkApiStatus();
+        });
+
+        async function checkApiStatus() {
+            const statusElement = document.getElementById('apiStatus');
+            try {
+                const response = await fetch(`${apiBaseUrl}/api/models`);
+                if (response.ok) {
+                    statusElement.textContent = 'SHAI Ready';
+                    statusElement.className = 'api-status connected';
+                } else {
+                    throw new Error('API not responding');
+                }
+            } catch (error) {
+                statusElement.textContent = 'SHAI Starting...';
+                statusElement.className = 'api-status disconnected';
+                console.error('API connection failed:', error);
+            }
+        }
+
+        function setupEventListeners() {
+            const chatInput = document.getElementById('chatInput');
+            const sendBtn = document.getElementById('sendBtn');
+
+            chatInput.addEventListener('input', function() {
+                autoResize(this);
+                sendBtn.disabled = !this.value.trim();
+            });
+        }
+
+        function autoResize(textarea) {
+            textarea.style.height = 'auto';
+            textarea.style.height = Math.min(textarea.scrollHeight, 150) + 'px';
+        }
+
+        function handleKeyDown(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            
+            if (!message || isTyping) return;
+
+            input.value = '';
+            autoResize(input);
+            document.getElementById('sendBtn').disabled = true;
+
+            if (!currentConversationId) {
+                currentConversationId = generateId();
+                conversations.unshift({
+                    id: currentConversationId,
+                    title: message.substring(0, 30) + (message.length > 30 ? '...' : ''),
+                    timestamp: new Date(),
+                    messages: []
+                });
+            }
+
+            addMessage('user', message);
+            showTypingIndicator();
+
+            try {
+                const response = await callSHAIAPI(message);
+                hideTypingIndicator();
+                addMessage('assistant', response.response, response.model_used, response.processing_time);
+                updateConversation(message, response.response);
+            } catch (error) {
+                hideTypingIndicator();
+                addMessage('assistant', `Sorry, I encountered an error: ${error.message}`, 'Error');
+                console.error('API Error:', error);
+            }
+        }
+
+        async function callSHAIAPI(userMessage) {
+            const requestBody = {
+                messages: [
+                    {
+                        role: "user",
+                        content: userMessage
+                    }
+                ],
+                model: "auto",
+                temperature: 0.7,
+                max_tokens: 2000,
+                stream: false
+            };
+
+            const response = await fetch(`${apiBaseUrl}/api/chat`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(requestBody)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'API request failed');
+            }
+
+            return await response.json();
+        }
+
+        function addMessage(role, content, model = null, processingTime = null) {
+            const messagesContainer = document.getElementById('chatMessages');
+            
+            if (messagesContainer.querySelector('.welcome-message')) {
+                messagesContainer.innerHTML = '';
+            }
+
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${role}`;
+            
+            const timestamp = new Date().toLocaleTimeString();
+            
+            let modelInfo = '';
+            if (model && model !== 'Error') {
+                modelInfo = ` | Model: ${model}`;
+                if (processingTime) {
+                    modelInfo += ` | Time: ${processingTime.toFixed(2)}s`;
+                }
+            }
+            
+            messageDiv.innerHTML = `
+                <div class="message-avatar">
+                    ${role === 'user' ? '👤' : '🤖'}
+                </div>
+                <div class="message-content">
+                    ${formatMessageContent(content)}
+                    <div class="model-info">
+                        ${timestamp}${modelInfo}
+                    </div>
+                </div>
+            `;
+            
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function formatMessageContent(content) {
+            return content
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                .replace(/`(.*?)`/g, '<code style="background: #f1f3f4; padding: 2px 6px; border-radius: 4px;">$1</code>')
+                .replace(/```([\s\S]*?)```/g, '<pre style="background: #f8f9fa; padding: 15px; border-radius: 10px; overflow-x: auto; margin: 10px 0;"><code>$1</code></pre>')
+                .replace(/\n/g, '<br>');
+        }
+
+        function showTypingIndicator() {
+            const messagesContainer = document.getElementById('chatMessages');
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'message assistant';
+            typingDiv.id = 'typingIndicator';
+            
+            typingDiv.innerHTML = `
+                <div class="message-avatar">🤖</div>
+                <div class="typing-indicator">
+                    <span>SHAI is thinking</span>
+                    <div class="typing-dots">
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                    </div>
+                </div>
+            `;
+            
+            messagesContainer.appendChild(typingDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            isTyping = true;
+        }
+
+        function hideTypingIndicator() {
+            const typingIndicator = document.getElementById('typingIndicator');
+            if (typingIndicator) {
+                typingIndicator.remove();
+            }
+            isTyping = false;
+        }
+
+        function startNewChat() {
+            currentConversationId = null;
+            document.getElementById('chatMessages').innerHTML = `
+                <div class="welcome-message">
+                    <h2>Welcome to SHAI - Super Human AI</h2>
+                    <p>Your advanced AI assistant with intelligent responses</p>
+                    
+                    <div class="feature-list">
+                        <div class="feature-item">
+                            <div class="feature-icon">🧠</div>
+                            <div>Smart AI</div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon">🔍</div>
+                            <div>Context Aware</div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon">💡</div>
+                            <div>Intelligent</div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon">⚡</div>
+                            <div>Fast Response</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('chatTitle').textContent = 'Welcome to SHAI';
+        }
+
+        function clearChat() {
+            if (confirm('Are you sure you want to clear this conversation?')) {
+                startNewChat();
+            }
+        }
+
+        function saveChat() {
+            if (!currentConversationId) {
+                alert('No conversation to save');
+                return;
+            }
+            
+            const conversation = conversations.find(c => c.id === currentConversationId);
+            if (conversation) {
+                const dataStr = JSON.stringify(conversation, null, 2);
+                const dataBlob = new Blob([dataStr], {type: 'application/json'});
+                const url = URL.createObjectURL(dataBlob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `shai_conversation_${conversation.id}.json`;
+                link.click();
+                URL.revokeObjectURL(url);
+            }
+        }
+
+        function updateConversation(userMessage, assistantMessage) {
+            const conversation = conversations.find(c => c.id === currentConversationId);
+            if (conversation) {
+                conversation.messages.push(
+                    { role: 'user', content: userMessage, timestamp: new Date() },
+                    { role: 'assistant', content: assistantMessage, timestamp: new Date() }
+                );
+                
+                if (conversation.messages.length === 2) {
+                    conversation.title = userMessage.substring(0, 30) + (userMessage.length > 30 ? '...' : '');
+                    document.getElementById('chatTitle').textContent = conversation.title;
+                }
+            }
+        }
+
+        function generateId() {
+            return Date.now().toString(36) + Math.random().toString(36).substr(2);
+        }
+    </script>
+</body>
+</html>
